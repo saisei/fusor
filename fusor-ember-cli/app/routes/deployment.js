@@ -12,6 +12,9 @@ export default Ember.Route.extend(DeploymentRouteMixin, {
     controller.set('satelliteTabRouteName', 'satellite.index');
     controller.set('organizationTabRouteName', 'configure-organization');
     controller.set('lifecycleEnvironmentTabRouteName', 'configure-environment');
+    if (Ember.isBlank(model.get('lifecycle_environment_id'))) {
+      controller.set('useDefaultOrgViewForEnv', true);
+    }
   },
 
   actions: {
@@ -60,6 +63,18 @@ export default Ember.Route.extend(DeploymentRouteMixin, {
               reject(response);
             }
         });
+      });
+    },
+
+    saveAndCancelDeployment: function() {
+      return this.send('saveDeployment', 'deployments');
+    },
+
+    cancelAndDeleteDeployment: function() {
+      var deployment = this.get('controller.model');
+      var self = this;
+      deployment.destroyRecord().then(function() {
+        return self.transitionTo('deployments');
       });
     },
 
