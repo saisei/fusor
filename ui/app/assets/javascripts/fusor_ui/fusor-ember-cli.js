@@ -140,7 +140,9 @@ define('fusor-ember-cli/components/cancel-back-next', ['exports', 'ember'], func
         var self = this.get('targetObject');
         self.send('cancelAndDeleteDeployment');
         return self.set('closeModal', true);
-      } }
+      }
+
+    }
 
   });
 
@@ -803,7 +805,9 @@ define('fusor-ember-cli/components/rchi-item', ['exports', 'ember'], function (e
 
     mouseLeave: function mouseLeave() {
       this.set('isHover', false);
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/components/review-link', ['exports', 'ember'], function (exports, Ember) {
@@ -844,7 +848,8 @@ define('fusor-ember-cli/components/rhci-hover-text', ['exports', 'ember'], funct
   'use strict';
 
   exports['default'] = Ember['default'].Component.extend({
-    classNames: ['rhci-footer-hover'] });
+    classNames: ['rhci-footer-hover']
+  });
 
 });
 define('fusor-ember-cli/components/rhci-start', ['exports', 'ember'], function (exports, Ember) {
@@ -936,7 +941,8 @@ define('fusor-ember-cli/components/textarea-f', ['exports', 'ember'], function (
 
     numCols: (function () {
       return this.getWithDefault('cols', '');
-    }).property() });
+    }).property()
+  });
 
 });
 define('fusor-ember-cli/components/tr-engine', ['exports', 'ember', 'fusor-ember-cli/mixins/save-hostname-mixin'], function (exports, Ember, SaveHostnameMixin) {
@@ -946,6 +952,18 @@ define('fusor-ember-cli/components/tr-engine', ['exports', 'ember', 'fusor-ember
   exports['default'] = Ember['default'].Component.extend(SaveHostnameMixin['default'], {
     tagName: 'tr',
 
+    classNameBindings: ['bgColor'],
+
+    isChecked: (function () {
+      return this.get('host.isSelectedAsEngine');
+    }).property('host.isSelectedAsEngine'),
+
+    bgColor: (function () {
+      if (this.get('isChecked')) {
+        return 'white-on-blue';
+      }
+    }).property('isChecked'),
+
     actions: {
       engineHostChanged: function engineHostChanged(host) {
         var self = this.get('targetObject');
@@ -953,7 +971,9 @@ define('fusor-ember-cli/components/tr-engine', ['exports', 'ember', 'fusor-ember
         return self.store.find('discovered-host', host.get('id')).then(function (result) {
           return controller.set('discovered_host', result);
         });
-      } }
+      }
+
+    }
 
   });
 
@@ -963,7 +983,36 @@ define('fusor-ember-cli/components/tr-hypervisor', ['exports', 'ember', 'fusor-e
   'use strict';
 
   exports['default'] = Ember['default'].Component.extend(SaveHostnameMixin['default'], {
-    tagName: 'tr' });
+    tagName: 'tr',
+
+    classNameBindings: ['bgColor'],
+
+    isChecked: (function () {
+      return this.get('host.isSelectedAsHypervisor');
+    }).property('host.isSelectedAsHypervisor'),
+
+    bgColor: (function () {
+      if (this.get('isChecked')) {
+        return 'white-on-blue';
+      }
+    }).property('isChecked'),
+
+    observeHostName: (function () {
+      if (this.get('host.isSelectedAsHypervisor')) {
+        if (this.get('isCustomScheme') && this.get('custom_preprend_name')) {
+          this.get('host').set('name', this.get('custom_preprend_name') + this.get('num'));
+        } else if (this.get('isHypervisorN')) {
+          this.get('host').set('name', 'hypervisor' + this.get('num'));
+        } else if (this.get('isMac')) {
+          this.get('host').set('name', 'mac' + this.get('host').get('mac').replace(/:/g, ''));
+        } else {
+          this.get('host').set('name', this.get('host.name'));
+        }
+        return this.send('saveHostname');
+      }
+    }).observes('host.isSelectedAsHypervisor', 'custom_preprend_name', 'isCustomScheme', 'isHypervisorN', 'isFreeform', 'isMac')
+
+  });
 
 });
 define('fusor-ember-cli/components/tr-management-app', ['exports', 'ember'], function (exports, Ember) {
@@ -974,9 +1023,17 @@ define('fusor-ember-cli/components/tr-management-app', ['exports', 'ember'], fun
 
     tagName: 'tr',
 
+    classNameBindings: ['bgColor'],
+
     isChecked: (function () {
-      return this.get('model.consumerUUID') === this.get('managementApp.uuid');
-    }).property('model.consumerUUID', 'managementApp.uuid'),
+      return this.get('consumerUUID') === this.get('managementApp.uuid');
+    }).property('consumerUUID', 'managementApp.uuid'),
+
+    bgColor: (function () {
+      if (this.get('isChecked')) {
+        return 'white-on-blue';
+      }
+    }).property('isChecked'),
 
     actions: {
       changeManagementApp: function changeManagementApp(event) {
@@ -1038,7 +1095,9 @@ define('fusor-ember-cli/components/tr-subscription', ['exports', 'ember'], funct
 
     envCssId: (function () {
       return 'env_' + this.get('env.id');
-    }).property('env') });
+    }).property('env')
+
+  });
 
 });
 define('fusor-ember-cli/components/tr-task', ['exports', 'ember'], function (exports, Ember) {
@@ -1047,7 +1106,9 @@ define('fusor-ember-cli/components/tr-task', ['exports', 'ember'], function (exp
 
   exports['default'] = Ember['default'].Component.extend({
 
-    tagName: 'tr' });
+    tagName: 'tr'
+
+  });
 
 });
 define('fusor-ember-cli/components/traffic-type', ['exports', 'ember'], function (exports, Ember) {
@@ -1074,7 +1135,9 @@ define('fusor-ember-cli/components/upstream-downstream', ['exports', 'ember'], f
 
       showDownstream: function showDownstream() {
         this.set('isUpstream', false);
-      } }
+      }
+
+    }
   });
 
 });
@@ -1106,8 +1169,9 @@ define('fusor-ember-cli/components/wizard-item', ['exports', 'ember'], function 
 
     future: (function () {
       return this.get('num') > this.get('currentStepNumber');
-    }).property('num', 'currentStepNumber') });
+    }).property('num', 'currentStepNumber')
 
+  });
   // isReviewTab: function() {
   //   return (this.get('routeName') == 'review')
   // }.property('routeName')
@@ -1147,7 +1211,9 @@ define('fusor-ember-cli/controllers/application', ['exports', 'ember'], function
 
       signOut: function signOut() {
         return this.transitionTo('login');
-      } }
+      }
+
+    }
   });
 
 });
@@ -1356,7 +1422,9 @@ define('fusor-ember-cli/controllers/cloudforms', ['exports', 'ember'], function 
 
   exports['default'] = Ember['default'].Controller.extend({
     needs: ['deployment'],
-    stepNumberCloudForms: Ember['default'].computed.alias('controllers.deployment.stepNumberCloudForms') });
+    stepNumberCloudForms: Ember['default'].computed.alias('controllers.deployment.stepNumberCloudForms')
+
+  });
 
 });
 define('fusor-ember-cli/controllers/cloudforms/cfme-configuration', ['exports', 'ember'], function (exports, Ember) {
@@ -1434,7 +1502,8 @@ define('fusor-ember-cli/controllers/configure-environment', ['exports', 'ember',
         }, function (response) {
           alert('error saving environment');
         });
-      } }
+      }
+    }
 
   });
 
@@ -1459,7 +1528,11 @@ define('fusor-ember-cli/controllers/configure-organization', ['exports', 'ember'
         this.set('showAlertMessage', false);
         this.set('selectedOrganization', organization);
         return this.get('controllers.deployment').set('organization', organization);
-      } } });
+      }
+
+    }
+
+  });
 
 });
 define('fusor-ember-cli/controllers/deployment-new', ['exports', 'ember', 'fusor-ember-cli/mixins/deployment-controller-mixin', 'fusor-ember-cli/mixins/disable-tab-mixin'], function (exports, Ember, DeploymentControllerMixin, DisableTabMixin) {
@@ -1482,7 +1555,9 @@ define('fusor-ember-cli/controllers/deployment-new', ['exports', 'ember', 'fusor
     hasLifecycleEnvironment: (function () {
       return !!this.get("lifecycle_environment").get("id") || this.get("useDefaultOrgViewForEnv"); // without .get('id') returns promise that is true
     }).property("lifecycle_environment", "useDefaultOrgViewForEnv"),
-    hasNoLifecycleEnvironment: Ember['default'].computed.not("hasLifecycleEnvironment") });
+    hasNoLifecycleEnvironment: Ember['default'].computed.not("hasLifecycleEnvironment")
+
+  });
 
 });
 define('fusor-ember-cli/controllers/deployment-new/satellite', ['exports', 'ember', 'fusor-ember-cli/mixins/satellite-controller-mixin'], function (exports, Ember, SatelliteControllerMixin) {
@@ -1501,7 +1576,9 @@ define('fusor-ember-cli/controllers/deployment-new/satellite', ['exports', 'embe
     disableTabConfigureOrganization: Ember['default'].computed.alias('controllers.deployment-new.disableTabConfigureOrganization'),
     disableTabLifecycleEnvironment: Ember['default'].computed.alias('controllers.deployment-new.disableTabLifecycleEnvironment'),
 
-    backRouteNameOnSatIndex: 'deployment-new.start' });
+    backRouteNameOnSatIndex: 'deployment-new.start'
+
+  });
 
 });
 define('fusor-ember-cli/controllers/deployment-new/satellite/configure-environment', ['exports', 'ember', 'fusor-ember-cli/mixins/configure-environment-mixin'], function (exports, Ember, ConfigureEnvironmentMixin) {
@@ -1557,7 +1634,8 @@ define('fusor-ember-cli/controllers/deployment-new/satellite/configure-environme
         }, function (response) {
           alert('error saving environment');
         });
-      } }
+      }
+    }
 
   });
 
@@ -1583,7 +1661,9 @@ define('fusor-ember-cli/controllers/deployment-new/satellite/configure-organizat
         this.set('selectedOrganization', organization);
         return this.get('controllers.deployment-new').set('organization', organization);
       }
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/controllers/deployment-new/satellite/index', ['exports', 'ember', 'fusor-ember-cli/mixins/satellite-controller-mixin'], function (exports, Ember, SatelliteControllerMixin) {
@@ -1596,7 +1676,9 @@ define('fusor-ember-cli/controllers/deployment-new/satellite/index', ['exports',
 
     validations: {
       name: {
-        presence: true } },
+        presence: true
+      }
+    },
 
     name: Ember['default'].computed.alias('controllers.deployment-new.name'),
     description: Ember['default'].computed.alias('controllers.deployment-new.description'),
@@ -1608,7 +1690,9 @@ define('fusor-ember-cli/controllers/deployment-new/satellite/index', ['exports',
     idSatName: 'deployment_new_sat_name',
     idSatDesc: 'deployment_new_sat_desc',
 
-    backRouteNameOnSatIndex: 'deployment-new.start' });
+    backRouteNameOnSatIndex: 'deployment-new.start'
+
+  });
 
 });
 define('fusor-ember-cli/controllers/deployment-new/start', ['exports', 'ember', 'fusor-ember-cli/mixins/start-controller-mixin'], function (exports, Ember, StartControllerMixin) {
@@ -1622,7 +1706,9 @@ define('fusor-ember-cli/controllers/deployment-new/start', ['exports', 'ember', 
     isRhev: Ember['default'].computed.alias('controllers.deployment-new.deploy_rhev'),
     isOpenStack: Ember['default'].computed.alias('controllers.deployment-new.deploy_openstack'),
     isCloudForms: Ember['default'].computed.alias('controllers.deployment-new.deploy_cfme'),
-    isSubscriptions: Ember['default'].computed.alias('controllers.deployment-new.isSubscriptions') });
+    isSubscriptions: Ember['default'].computed.alias('controllers.deployment-new.isSubscriptions')
+
+  });
 
 });
 define('fusor-ember-cli/controllers/deployment', ['exports', 'ember', 'fusor-ember-cli/mixins/deployment-controller-mixin', 'fusor-ember-cli/mixins/disable-tab-mixin'], function (exports, Ember, DeploymentControllerMixin, DisableTabMixin) {
@@ -1651,7 +1737,8 @@ define('fusor-ember-cli/controllers/deployment', ['exports', 'ember', 'fusor-emb
       name: {
         presence: true,
         length: { minimum: 2 }
-      } },
+      }
+    },
 
     selectedRhevEngine: null,
 
@@ -1661,7 +1748,9 @@ define('fusor-ember-cli/controllers/deployment', ['exports', 'ember', 'fusor-emb
 
     isStarted: (function () {
       return !!this.get("model.foreman_task_uuid");
-    }).property("model.foreman_task_uuid") });
+    }).property("model.foreman_task_uuid")
+
+  });
 
 });
 define('fusor-ember-cli/controllers/deployment/start', ['exports', 'ember', 'fusor-ember-cli/mixins/start-controller-mixin'], function (exports, Ember, StartControllerMixin) {
@@ -1675,7 +1764,9 @@ define('fusor-ember-cli/controllers/deployment/start', ['exports', 'ember', 'fus
     isRhev: Ember['default'].computed.alias('controllers.deployment.deploy_rhev'),
     isOpenStack: Ember['default'].computed.alias('controllers.deployment.deploy_openstack'),
     isCloudForms: Ember['default'].computed.alias('controllers.deployment.deploy_cfme'),
-    isSubscriptions: Ember['default'].computed.alias('controllers.deployment.isSubscriptions') });
+    isSubscriptions: Ember['default'].computed.alias('controllers.deployment.isSubscriptions')
+
+  });
 
 });
 define('fusor-ember-cli/controllers/deployments', ['exports', 'ember'], function (exports, Ember) {
@@ -1703,7 +1794,9 @@ define('fusor-ember-cli/controllers/deployments', ['exports', 'ember'], function
       } else {
         return model;
       }
-    }).property('sortedDeployments', 'searchDeploymentString') });
+    }).property('sortedDeployments', 'searchDeploymentString')
+
+  });
 
 });
 define('fusor-ember-cli/controllers/discovered-host', ['exports', 'ember'], function (exports, Ember) {
@@ -1817,7 +1910,27 @@ define('fusor-ember-cli/controllers/engine/discovered-host', ['exports', 'ember'
       var hypervisorsIds = this.get('selectedHypervisors').getEach('id');
       console.log(hypervisorsIds);
       return !hypervisorsIds.contains(item.get('id'));
-    }).property('selectedHypervisors', 'allDiscoveredHosts') });
+    }).property('selectedHypervisors', 'allDiscoveredHosts'),
+
+    filteredHosts: (function () {
+      var searchString = this.get('searchString');
+      var rx = new RegExp(searchString, 'gi');
+      var model = this.get('availableHosts');
+
+      if (model.get('length') > 0) {
+        return model.filter(function (record) {
+          return record.get('name').match(rx) || record.get('memory_human_size').match(rx) || record.get('disks_human_size').match(rx) || record.get('subnet_to_s').match(rx) || record.get('mac').match(rx);
+        });
+      } else {
+        return model;
+      }
+    }).property('availableHosts', 'searchString'),
+
+    numSelected: (function () {
+      return this.get('model.id') ? 1 : 0;
+    }).property('model')
+
+  });
 
 });
 define('fusor-ember-cli/controllers/host', ['exports', 'ember'], function (exports, Ember) {
@@ -1839,7 +1952,30 @@ define('fusor-ember-cli/controllers/hypervisor', ['exports', 'ember'], function 
   'use strict';
 
   exports['default'] = Ember['default'].Controller.extend({
-    needs: ['rhev'] });
+    needs: ['rhev', 'deployment'],
+
+    host_naming_scheme: Ember['default'].computed.alias('controllers.deployment.host_naming_scheme'),
+    custom_preprend_name: Ember['default'].computed.alias('controllers.deployment.custom_preprend_name'),
+
+    namingOptions: ['Freeform', 'MAC address', 'hypervisorN', 'Custom scheme'],
+
+    isFreeform: (function () {
+      return this.get('host_naming_scheme') === 'Freeform';
+    }).property('host_naming_scheme'),
+
+    isMac: (function () {
+      return this.get('host_naming_scheme') === 'MAC address';
+    }).property('host_naming_scheme'),
+
+    isCustomScheme: (function () {
+      return this.get('host_naming_scheme') === 'Custom scheme';
+    }).property('host_naming_scheme'),
+
+    isHypervisorN: (function () {
+      return this.get('host_naming_scheme') === 'hypervisorN';
+    }).property('host_naming_scheme')
+
+  });
 
 });
 define('fusor-ember-cli/controllers/hypervisor/discovered-host', ['exports', 'ember'], function (exports, Ember) {
@@ -1847,17 +1983,37 @@ define('fusor-ember-cli/controllers/hypervisor/discovered-host', ['exports', 'em
   'use strict';
 
   exports['default'] = Ember['default'].ArrayController.extend({
-    needs: ['deployment'],
+    needs: ['deployment', 'hypervisor'],
 
     itemController: ['discovered-host'],
 
     selectedRhevEngine: Ember['default'].computed.alias('controllers.deployment.discovered_host'),
     rhev_is_self_hosted: Ember['default'].computed.alias('controllers.deployment.rhev_is_self_hosted'),
 
+    isCustomScheme: Ember['default'].computed.alias('controllers.hypervisor.isCustomScheme'),
+    isHypervisorN: Ember['default'].computed.alias('controllers.hypervisor.isHypervisorN'),
+    custom_preprend_name: Ember['default'].computed.alias('controllers.hypervisor.custom_preprend_name'),
+    isFreeform: Ember['default'].computed.alias('controllers.hypervisor.isFreeform'),
+    isMac: Ember['default'].computed.alias('controllers.hypervisor.isMac'),
+
     // Filter out hosts selected as Hypervisor
     availableHosts: Ember['default'].computed.filter('allDiscoveredHosts', function (host, index, array) {
       return host.get('id') != this.get('selectedRhevEngine.id');
     }).property('allDiscoveredHosts', 'selectedRhevEngine'),
+
+    filteredHosts: (function () {
+      var searchString = this.get('searchString');
+      var rx = new RegExp(searchString, 'gi');
+      var model = this.get('availableHosts');
+
+      if (model.get('length') > 0) {
+        return model.filter(function (record) {
+          return record.get('name').match(rx) || record.get('memory_human_size').match(rx) || record.get('disks_human_size').match(rx) || record.get('subnet_to_s').match(rx) || record.get('mac').match(rx);
+        });
+      } else {
+        return model;
+      }
+    }).property('availableHosts', 'searchString'),
 
     hypervisorModelIds: (function () {
       if (this.get('model')) {
@@ -1874,37 +2030,16 @@ define('fusor-ember-cli/controllers/hypervisor/discovered-host', ['exports', 'em
       return this.get('cntSelectedHypervisorHosts') === 1 ? 'host' : 'hosts';
     }).property('cntSelectedHypervisorHosts'),
 
-    isAllChecked: (function (key, value) {
-      if (this.get('cntSelectedHypervisorHosts') === this.get('availableHosts.length')) {
-        return this.set('allChecked', true);
-      } else {
-        return this.set('allChecked', false);
-      }
-    }).property('availableHosts.@each.isSelectedAsHypervisor', 'cntSelectedHypervisorHosts'),
+    isAllChecked: (function () {
+      return this.get('cntSelectedHypervisorHosts') === this.get('availableHosts.length');
+    }).property('availableHosts.@each', 'cntSelectedHypervisorHosts'),
 
-    allChecked: (function (key, value) {
-      // get
-      if (arguments.length === 1) {
-        var availableHosts = this.get('availableHosts');
-        var isAllChecked = this.get('model.length') === this.get('availableHosts.length');
-        return availableHosts && isAllChecked;
-        // setter
-      } else {}
-    }).property('model.@each.isSelectedAsHypervisor', 'model.[]', 'availableHosts'),
-
-    checkAll: (function (row) {
+    observeAllChecked: (function (row) {
       // TODO
       if (this.get('allChecked')) {
-        // var hosts = this.get('model');
-        // hosts.clear();
-        // hosts.addObjects(this.get('availableHosts'));
-        // return true;
-        console.log('all checked true');
+        return this.send('setCheckAll');
       } else {
-        // var hosts = this.get('model');
-        // return hosts.clear();
-        // return false;
-        console.log('all checked FALSE');
+        return this.send('setUncheckAll');
       }
     }).observes('allChecked'),
 
@@ -1923,11 +2058,25 @@ define('fusor-ember-cli/controllers/hypervisor/discovered-host', ['exports', 'em
       } else {
         return 'engine.discovered-host';
       }
-    }).property('rhev_is_self_hosted') });
+    }).property('rhev_is_self_hosted'),
 
-  // TODO - this is running when each host is individually checked as well????
-  // Problem because isSelectedAsHypervisor is on the itemController and not model ???
-  // console.log('setter only');
+    actions: {
+      refreshModel: function refreshModel() {
+        return this.get('model').reload();
+      },
+
+      setCheckAll: function setCheckAll() {
+        this.get('model').removeObjects(this.get('availableHosts'));
+        return this.get('model').addObjects(this.get('availableHosts'));
+      },
+
+      setUncheckAll: function setUncheckAll() {
+        return this.get('model').removeObjects(this.get('availableHosts'));
+      }
+
+    }
+
+  });
 
 });
 define('fusor-ember-cli/controllers/lifecycle-environment', ['exports', 'ember'], function (exports, Ember) {
@@ -1953,7 +2102,9 @@ define('fusor-ember-cli/controllers/login', ['exports', 'ember'], function (expo
 
     identification: null,
     password: null,
-    errorMessage: null });
+    errorMessage: null
+
+  });
 
 });
 define('fusor-ember-cli/controllers/logout-model', ['exports', 'ember'], function (exports, Ember) {
@@ -1998,7 +2149,8 @@ define('fusor-ember-cli/controllers/openstack', ['exports', 'ember'], function (
 
   exports['default'] = Ember['default'].Controller.extend({
     needs: ['deployment'],
-    stepNumberOpenstack: Ember['default'].computed.alias('controllers.deployment.stepNumberOpenstack') });
+    stepNumberOpenstack: Ember['default'].computed.alias('controllers.deployment.stepNumberOpenstack')
+  });
 
 });
 define('fusor-ember-cli/controllers/organization', ['exports', 'ember'], function (exports, Ember) {
@@ -2055,7 +2207,9 @@ define('fusor-ember-cli/controllers/products', ['exports', 'ember'], function (e
         }, 4500);
       }
 
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/controllers/register-nodes', ['exports', 'ember', 'fusor-ember-cli/mixins/deployment-controller-mixin'], function (exports, Ember, DeploymentControllerMixin) {
@@ -2391,7 +2545,9 @@ define('fusor-ember-cli/controllers/review', ['exports', 'ember'], function (exp
 
     nameSelectSubscriptions: Ember['default'].computed.alias('controllers.rhci.nameSelectSubscriptions'),
 
-    stepNumberReview: Ember['default'].computed.alias('controllers.deployment.stepNumberReview') });
+    stepNumberReview: Ember['default'].computed.alias('controllers.deployment.stepNumberReview')
+
+  });
 
 });
 define('fusor-ember-cli/controllers/review/installation', ['exports', 'ember'], function (exports, Ember) {
@@ -2464,7 +2620,9 @@ define('fusor-ember-cli/controllers/review/installation', ['exports', 'ember'], 
     nameRhev: Ember['default'].computed.alias('controllers.rhci.nameRhev'),
     nameOpenStack: Ember['default'].computed.alias('controllers.rhci.nameOpenStack'),
     nameCloudForms: Ember['default'].computed.alias('controllers.rhci.nameCloudForms'),
-    nameSatellite: Ember['default'].computed.alias('controllers.rhci.nameSatellite') });
+    nameSatellite: Ember['default'].computed.alias('controllers.rhci.nameSatellite')
+
+  });
 
 });
 define('fusor-ember-cli/controllers/review/progress', ['exports', 'ember'], function (exports, Ember) {
@@ -2500,7 +2658,9 @@ define('fusor-ember-cli/controllers/review/progress', ['exports', 'ember'], func
 
     prog: 1,
 
-    incrementBy: 20 });
+    incrementBy: 20
+
+  });
 
 });
 define('fusor-ember-cli/controllers/review/progress/details/task', ['exports', 'ember'], function (exports, Ember) {
@@ -2561,11 +2721,16 @@ define('fusor-ember-cli/controllers/rhev-options', ['exports', 'ember'], functio
     yesNo: ['Yes', 'No'],
     applicationModes2: [{
       id: 1,
-      name: 'Both' }, {
+      name: 'Both'
+    }, {
       id: 2,
-      name: 'Virt' }, {
+      name: 'Virt'
+    }, {
       id: 3,
-      name: 'Gluster' }] });
+      name: 'Gluster'
+    }]
+
+  });
 
 });
 define('fusor-ember-cli/controllers/rhev-setup', ['exports', 'ember'], function (exports, Ember) {
@@ -2618,7 +2783,9 @@ define('fusor-ember-cli/controllers/rhev', ['exports', 'ember'], function (expor
       } else {
         return 'Engine';
       }
-    }).property('isSelfHost') });
+    }).property('isSelfHost')
+
+  });
 
 });
 define('fusor-ember-cli/controllers/satellite', ['exports', 'ember', 'fusor-ember-cli/mixins/satellite-controller-mixin'], function (exports, Ember, SatelliteControllerMixin) {
@@ -2635,7 +2802,9 @@ define('fusor-ember-cli/controllers/satellite', ['exports', 'ember', 'fusor-embe
 
     disableTabDeploymentName: Ember['default'].computed.alias('controllers.deployment.disableTabDeploymentName'),
     disableTabConfigureOrganization: Ember['default'].computed.alias('controllers.deployment.disableTabConfigureOrganization'),
-    disableTabLifecycleEnvironment: Ember['default'].computed.alias('controllers.deployment.disableTabLifecycleEnvironment') });
+    disableTabLifecycleEnvironment: Ember['default'].computed.alias('controllers.deployment.disableTabLifecycleEnvironment')
+
+  });
 
 });
 define('fusor-ember-cli/controllers/satellite/index', ['exports', 'ember', 'fusor-ember-cli/mixins/satellite-controller-mixin'], function (exports, Ember, SatelliteControllerMixin) {
@@ -2648,7 +2817,9 @@ define('fusor-ember-cli/controllers/satellite/index', ['exports', 'ember', 'fuso
 
     validations: {
       name: {
-        presence: true } },
+        presence: true
+      }
+    },
 
     name: Ember['default'].computed.alias('controllers.deployment.name'),
     description: Ember['default'].computed.alias('controllers.deployment.description'),
@@ -2660,7 +2831,9 @@ define('fusor-ember-cli/controllers/satellite/index', ['exports', 'ember', 'fuso
     idSatName: 'deployment_sat_name',
     idSatDesc: 'deployment_sat_desc',
 
-    backRouteNameOnSatIndex: 'deployment.start' });
+    backRouteNameOnSatIndex: 'deployment.start'
+
+  });
 
 });
 define('fusor-ember-cli/controllers/satellite/subscription', ['exports', 'ember'], function (exports, Ember) {
@@ -2672,7 +2845,9 @@ define('fusor-ember-cli/controllers/satellite/subscription', ['exports', 'ember'
 
     registerOnParent: (function () {
       this.send('registerToggle', this);
-    }).on('init') });
+    }).on('init')
+
+  });
 
 });
 define('fusor-ember-cli/controllers/side-menu', ['exports', 'ember'], function (exports, Ember) {
@@ -2716,6 +2891,11 @@ define('fusor-ember-cli/controllers/storage', ['exports', 'ember'], function (ex
     rhev_storage_type: Ember['default'].computed.alias('controllers.deployment.rhev_storage_type'),
     rhev_storage_address: Ember['default'].computed.alias('controllers.deployment.rhev_storage_address'),
     rhev_share_path: Ember['default'].computed.alias('controllers.deployment.rhev_share_path'),
+
+    rhev_export_domain_name: Ember['default'].computed.alias('controllers.deployment.rhev_export_domain_name'),
+    rhev_export_domain_address: Ember['default'].computed.alias('controllers.deployment.rhev_export_domain_address'),
+    rhev_export_domain_path: Ember['default'].computed.alias('controllers.deployment.rhev_export_domain_path'),
+
     step3RouteName: Ember['default'].computed.alias('controllers.deployment.step3RouteName'),
     isCloudForms: Ember['default'].computed.alias('controllers.deployment.isCloudForms'),
 
@@ -2729,7 +2909,9 @@ define('fusor-ember-cli/controllers/storage', ['exports', 'ember'], function (ex
 
     isGluster: (function () {
       return this.get('rhev_storage_type') === 'Gluster';
-    }).property('rhev_storage_type') });
+    }).property('rhev_storage_type')
+
+  });
 
 });
 define('fusor-ember-cli/controllers/subscription', ['exports', 'ember'], function (exports, Ember) {
@@ -2751,7 +2933,9 @@ define('fusor-ember-cli/controllers/subscriptions', ['exports', 'ember'], functi
     stepNumberSubscriptions: Ember['default'].computed.alias('controllers.deployment.stepNumberSubscriptions'),
 
     disableTabManagementApplication: Ember['default'].computed.not('model.isAuthenticated'),
-    disableTabSelectSubsciptions: Ember['default'].computed.not('model.isAuthenticated') });
+    disableTabSelectSubsciptions: Ember['default'].computed.not('model.isAuthenticated')
+
+  });
 
 });
 define('fusor-ember-cli/controllers/subscriptions/credentials', ['exports', 'ember'], function (exports, Ember) {
@@ -2805,7 +2989,9 @@ define('fusor-ember-cli/controllers/subscriptions/credentials', ['exports', 'emb
       } else {
         return 'loginPortal';
       }
-    }).property('model.isAuthenticated') });
+    }).property('model.isAuthenticated')
+
+  });
 
 });
 define('fusor-ember-cli/controllers/subscriptions/management-application', ['exports', 'ember'], function (exports, Ember) {
@@ -2854,7 +3040,8 @@ define('fusor-ember-cli/controllers/subscriptions/management-application', ['exp
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
-              'X-CSRF-Token': token },
+              'X-CSRF-Token': token
+            },
             success: function success(response) {
               self.get('model').pushObject(response);
               self.get('sessionPortal').set('consumerUUID', response.uuid);
@@ -2871,7 +3058,9 @@ define('fusor-ember-cli/controllers/subscriptions/management-application', ['exp
         });
       }
 
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/controllers/subscriptions/select-subscriptions', ['exports', 'ember'], function (exports, Ember) {
@@ -2887,7 +3076,7 @@ define('fusor-ember-cli/controllers/subscriptions/select-subscriptions', ['expor
     stepNumberSubscriptions: Ember['default'].computed.alias('controllers.deployment.stepNumberSubscriptions'),
 
     isOnlyShowSubscriptions: true,
-    enableAnalytics: false, // TODO should be set by setupController using API call
+    enableAnalytics: true,
 
     buttonAttachTitle: (function () {
       if (this.get('attachingInProgress')) {
@@ -2924,7 +3113,9 @@ define('fusor-ember-cli/controllers/subscriptions/select-subscriptions', ['expor
 
     disableAttachButton: (function () {
       return !this.get('model').isAny('isSelectedSubscription') || this.get('attachingInProgress');
-    }).property('model.@each.isSelectedSubscription', 'attachingInProgress') });
+    }).property('model.@each.isSelectedSubscription', 'attachingInProgress')
+
+  });
 
 });
 define('fusor-ember-cli/controllers/where-install', ['exports', 'ember'], function (exports, Ember) {
@@ -3296,7 +3487,8 @@ define('fusor-ember-cli/mixins/configure-organization-mixin', ['exports', 'ember
           //organization.unloadRecord();
         });
         //}
-      } }
+      }
+    }
 
   });
 
@@ -3492,7 +3684,9 @@ define('fusor-ember-cli/mixins/deployment-controller-mixin', ['exports', 'ember'
           return 'review';
         }
       }
-    }).property('step2RouteName', 'isOpenStack', 'isCloudForms', 'isSubscriptions') });
+    }).property('step2RouteName', 'isOpenStack', 'isCloudForms', 'isSubscriptions')
+
+  });
 
 });
 define('fusor-ember-cli/mixins/deployment-new-controller-mixin', ['exports', 'ember'], function (exports, Ember) {
@@ -3505,7 +3699,9 @@ define('fusor-ember-cli/mixins/deployment-new-controller-mixin', ['exports', 'em
       if (this.controllerFor('deployment-new').get('disableNextOnStart')) {
         return this.transitionTo('deployment-new.start');
       }
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/mixins/deployment-new-satellite-route-mixin', ['exports', 'ember'], function (exports, Ember) {
@@ -3518,7 +3714,9 @@ define('fusor-ember-cli/mixins/deployment-new-satellite-route-mixin', ['exports'
       if (this.controllerFor('deployment-new').get('disableNextOnStart')) {
         return this.transitionTo('deployment-new.start');
       }
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/mixins/deployment-route-mixin', ['exports', 'ember'], function (exports, Ember) {
@@ -3542,7 +3740,8 @@ define('fusor-ember-cli/mixins/deployment-route-mixin', ['exports', 'ember'], fu
         }, function (error) {
           alert('There was an error trying to save: ' + error);
         });
-      } }
+      }
+    }
 
   });
 
@@ -3582,7 +3781,9 @@ define('fusor-ember-cli/mixins/disable-tab-mixin', ['exports', 'ember'], functio
     // Satellite Tabs Only
     disableTabDeploymentName: false, // always enable tab for entering deployment name
     disableTabConfigureOrganization: Ember['default'].computed.alias('disableNextOnDeploymentName'),
-    disableTabLifecycleEnvironment: Ember['default'].computed.alias('disableNextOnConfigureOrganization') });
+    disableTabLifecycleEnvironment: Ember['default'].computed.alias('disableNextOnConfigureOrganization')
+
+  });
 
 });
 define('fusor-ember-cli/mixins/meta', ['exports', 'ember'], function (exports, Ember) {
@@ -3687,7 +3888,9 @@ define('fusor-ember-cli/mixins/progress-bar-mixin', ['exports', 'ember'], functi
       if (this.get('deploymentStatus') === 'In Process' && this.get('model.result') === 'pending') {
         return 'Installing components';
       }
-    }).property('deploymentStatus', 'model.result') });
+    }).property('deploymentStatus', 'model.result')
+
+  });
 
 });
 define('fusor-ember-cli/mixins/satellite-controller-mixin', ['exports', 'ember'], function (exports, Ember) {
@@ -3841,7 +4044,9 @@ define('fusor-ember-cli/mixins/start-controller-mixin', ['exports', 'ember'], fu
       } else {
         return '/assets/r/rhci-cloudforms-640-210.png';
       }
-    }).property('isUpstream') });
+    }).property('isUpstream')
+
+  });
 
 });
 define('fusor-ember-cli/models/coordinator', ['exports', 'ember', 'fusor-ember-cli/models/obj-hash'], function (exports, Ember, ObjHash) {
@@ -3921,6 +4126,10 @@ define('fusor-ember-cli/models/deployment', ['exports', 'ember-data'], function 
     rhev_gluster_ssh_port: DS['default'].attr('string'),
     rhev_gluster_root_password: DS['default'].attr('string'),
 
+    host_naming_scheme: DS['default'].attr('string'),
+    custom_preprend_name: DS['default'].attr('string'),
+    enable_access_insights: DS['default'].attr('boolean'),
+
     created_at: DS['default'].attr('date'),
     updated_at: DS['default'].attr('date'),
 
@@ -3928,7 +4137,9 @@ define('fusor-ember-cli/models/deployment', ['exports', 'ember-data'], function 
     discovered_host: DS['default'].belongsTo('discovered-host', { inverse: 'deployment', async: true }),
 
     // has many Hypervisors
-    discovered_hosts: DS['default'].hasMany('discovered-host', { inverse: 'deployments', async: true }) });
+    discovered_hosts: DS['default'].hasMany('discovered-host', { inverse: 'deployments', async: true })
+
+  });
 
 });
 define('fusor-ember-cli/models/discovered-host', ['exports', 'ember-data'], function (exports, DS) {
@@ -3960,7 +4171,9 @@ define('fusor-ember-cli/models/discovered-host', ['exports', 'ember-data'], func
     deployments: DS['default'].hasMany('deployment', { inverse: 'discovered_hosts', async: true }),
 
     created_at: DS['default'].attr('date'),
-    updated_at: DS['default'].attr('date') });
+    updated_at: DS['default'].attr('date')
+
+  });
 
 });
 define('fusor-ember-cli/models/environment', ['exports', 'ember-data'], function (exports, DS) {
@@ -4016,7 +4229,8 @@ define('fusor-ember-cli/models/host', ['exports', 'ember-data'], function (expor
     organization: DS['default'].attr('string'),
     cpu: DS['default'].attr('string'),
     memory: DS['default'].attr('string'),
-    vendor: DS['default'].attr('string') });
+    vendor: DS['default'].attr('string')
+  });
 
 });
 define('fusor-ember-cli/models/hostgroup', ['exports', 'ember-data'], function (exports, DS) {
@@ -4024,8 +4238,8 @@ define('fusor-ember-cli/models/hostgroup', ['exports', 'ember-data'], function (
   'use strict';
 
   exports['default'] = DS['default'].Model.extend({
-    name: DS['default'].attr('string') });
-
+    name: DS['default'].attr('string')
+  });
   // hostgroup: DS.attr('string'),
   // mac: DS.attr('string'),
   // domain: DS.attr('string'),
@@ -4127,8 +4341,8 @@ define('fusor-ember-cli/models/organization', ['exports', 'ember-data'], functio
     title: DS['default'].attr('string'),
     label: DS['default'].attr('string'),
     description: DS['default'].attr('string'),
-    lifecycle_environments: DS['default'].hasMany('lifecycle-environment', { async: true }) });
-
+    lifecycle_environments: DS['default'].hasMany('lifecycle-environment', { async: true })
+  });
   //  subnets: DS.hasMany('subnet', { async: true })
 
 });
@@ -4141,7 +4355,8 @@ define('fusor-ember-cli/models/product', ['exports', 'ember-data'], function (ex
     state_time: DS['default'].attr('string'),
     duration: DS['default'].attr('string'),
     size: DS['default'].attr('string'),
-    result: DS['default'].attr('string') });
+    result: DS['default'].attr('string')
+  });
 
 });
 define('fusor-ember-cli/models/session-portal', ['exports', 'ember-data'], function (exports, DS) {
@@ -4194,7 +4409,8 @@ define('fusor-ember-cli/models/subscription', ['exports', 'ember-data'], functio
     type: DS['default'].attr('string'),
     startDate: DS['default'].attr('date'),
     endDate: DS['default'].attr('date'),
-    quantity: DS['default'].attr('number') });
+    quantity: DS['default'].attr('number')
+  });
 
 });
 define('fusor-ember-cli/models/traffic-type', ['exports', 'ember-data'], function (exports, DS) {
@@ -4341,7 +4557,9 @@ define('fusor-ember-cli/routes/application', ['exports', 'ember'], function (exp
       },
       willImplement: function willImplement() {
         alert('Check back soon. This will be implemented soon.');
-      } }
+      }
+
+    }
   });
 
 });
@@ -4376,7 +4594,9 @@ define('fusor-ember-cli/routes/cloudforms', ['exports', 'ember'], function (expo
       controller.set('model', model);
       var stepNumberCloudForms = this.controllerFor('deployment').get('stepNumberCloudForms');
       return this.controllerFor('deployment').set('currentStepNumber', stepNumberCloudForms);
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/routes/cloudforms/cfme-configuration', ['exports', 'ember'], function (exports, Ember) {
@@ -4387,7 +4607,9 @@ define('fusor-ember-cli/routes/cloudforms/cfme-configuration', ['exports', 'embe
 
     deactivate: function deactivate() {
       return this.send('saveDeployment', null);
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/routes/cloudforms/index', ['exports', 'ember'], function (exports, Ember) {
@@ -4496,7 +4718,9 @@ define('fusor-ember-cli/routes/deployment-new/index', ['exports', 'ember'], func
     // if user manually hits this route (deployments/news), then redirecto to deployments/news/start
     beforeModel: function beforeModel() {
       return this.transitionTo('deployment-new.start');
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/routes/deployment-new/satellite', ['exports', 'ember'], function (exports, Ember) {
@@ -4532,7 +4756,9 @@ define('fusor-ember-cli/routes/deployment-new/satellite/configure-environment', 
           return controller.set('useDefaultOrgViewForEnv', false);
         }
       });
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/routes/deployment-new/satellite/configure-organization', ['exports', 'ember', 'fusor-ember-cli/mixins/deployment-new-satellite-route-mixin'], function (exports, Ember, DeploymentNewSatelliteRouteMixin) {
@@ -4556,7 +4782,9 @@ define('fusor-ember-cli/routes/deployment-new/satellite/configure-organization',
           controller.set('selectedOrganization', defaultOrg);
         }
       });
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/routes/deployment-new/satellite/index', ['exports', 'ember', 'fusor-ember-cli/mixins/deployment-new-satellite-route-mixin'], function (exports, Ember, DeploymentNewSatelliteRouteMixin) {
@@ -4584,7 +4812,9 @@ define('fusor-ember-cli/routes/deployment-new/start', ['exports', 'ember'], func
 
     deactivate: function deactivate() {
       this.controllerFor('deployment-new').set('isHideWizard', false);
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/routes/deployment', ['exports', 'ember', 'fusor-ember-cli/mixins/deployment-route-mixin'], function (exports, Ember, DeploymentRouteMixin) {
@@ -4714,7 +4944,9 @@ define('fusor-ember-cli/routes/deployment', ['exports', 'ember', 'fusor-ember-cl
             }
           });
         });
-      } }
+      }
+
+    }
 
   });
 
@@ -4805,7 +5037,9 @@ define('fusor-ember-cli/routes/engine/discovered-host', ['exports', 'ember'], fu
 
     deactivate: function deactivate() {
       return this.send('saveDeployment', null);
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/routes/engine/existing-host', ['exports', 'ember'], function (exports, Ember) {
@@ -4872,7 +5106,9 @@ define('fusor-ember-cli/routes/hostgroup', ['exports', 'ember'], function (expor
       controller.set('model', model);
       // TODO - how to make parent_id dynamic
       controller.set('parent_hostgroup', this.store.find('hostgroup', 1));
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/routes/hostgroup/edit', ['exports', 'ember'], function (exports, Ember) {
@@ -5081,7 +5317,9 @@ define('fusor-ember-cli/routes/openstack', ['exports', 'ember'], function (expor
       controller.set('model', model);
       var stepNumberOpenstack = this.controllerFor('deployment').get('stepNumberOpenstack');
       return this.controllerFor('deployment').set('currentStepNumber', stepNumberOpenstack);
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/routes/openstack/index', ['exports', 'ember'], function (exports, Ember) {
@@ -5142,7 +5380,9 @@ define('fusor-ember-cli/routes/review', ['exports', 'ember'], function (exports,
       controller.set('model', model);
       var stepNumberReview = this.controllerFor('deployment').get('stepNumberReview');
       return this.controllerFor('deployment').set('currentStepNumber', stepNumberReview);
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/routes/review/index', ['exports', 'ember'], function (exports, Ember) {
@@ -5282,7 +5522,8 @@ define('fusor-ember-cli/routes/rhev-options', ['exports', 'ember'], function (ex
   exports['default'] = Ember['default'].Route.extend({
     deactivate: function deactivate() {
       return this.send('saveDeployment', null);
-    } });
+    }
+  });
 
 });
 define('fusor-ember-cli/routes/rhev-setup', ['exports', 'ember'], function (exports, Ember) {
@@ -5305,7 +5546,9 @@ define('fusor-ember-cli/routes/rhev', ['exports', 'ember'], function (exports, E
     setupController: function setupController(controller, model) {
       controller.set('model', model);
       return this.controllerFor('deployment').set('currentStepNumber', 2);
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/routes/rhev/index', ['exports', 'ember'], function (exports, Ember) {
@@ -5335,7 +5578,9 @@ define('fusor-ember-cli/routes/satellite', ['exports', 'ember'], function (expor
       deployment.save().then(function () {
         return console.log('saved deployment successfully');
       });
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/routes/satellite/index', ['exports', 'ember'], function (exports, Ember) {
@@ -5395,7 +5640,9 @@ define('fusor-ember-cli/routes/storage', ['exports', 'ember'], function (exports
       controller.set('model', model);
       controller.set('rhev_storage_type', 'NFS');
       controller.set('rhev_gluster_ssh_port', 22);
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/routes/subscriptions', ['exports', 'ember'], function (exports, Ember) {
@@ -5477,7 +5724,8 @@ define('fusor-ember-cli/routes/subscriptions/credentials', ['exports', 'ember'],
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
-              'X-CSRF-Token': token },
+              'X-CSRF-Token': token
+            },
             success: function success(response) {
               //show always be {} empty successful 200 response
               self.send('saveCredentials');
@@ -5504,7 +5752,8 @@ define('fusor-ember-cli/routes/subscriptions/credentials', ['exports', 'ember'],
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
-              'X-CSRF-Token': token },
+              'X-CSRF-Token': token
+            },
             success: function success(response) {
               //show always be {} empty successful 200 response
               self.modelFor('subscriptions').setProperties({ 'isAuthenticated': false,
@@ -5558,7 +5807,8 @@ define('fusor-ember-cli/routes/subscriptions/credentials', ['exports', 'ember'],
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
-              'X-CSRF-Token': token },
+              'X-CSRF-Token': token
+            },
 
             success: function success(response) {
               var ownerKey = response[0]['key'];
@@ -5759,7 +6009,8 @@ define('fusor-ember-cli/routes/subscriptions/select-subscriptions', ['exports', 
                 headers: {
                   'Accept': 'application/json',
                   'Content-Type': 'application/json',
-                  'X-CSRF-Token': token },
+                  'X-CSRF-Token': token
+                },
 
                 success: function success(response) {
                   controller.set('attachingInProgress', false);
@@ -5780,7 +6031,8 @@ define('fusor-ember-cli/routes/subscriptions/select-subscriptions', ['exports', 
       error: function error(reason, transition) {
         console.log(reason);
         //alert(reason.statusText);
-      } }
+      }
+    }
 
   });
 
@@ -5812,7 +6064,9 @@ define('fusor-ember-cli/routes/where-install', ['exports', 'ember'], function (e
 
     deactivate: function deactivate() {
       return this.send('saveDeployment', null);
-    } });
+    }
+
+  });
 
 });
 define('fusor-ember-cli/serializers/foreman-task', ['exports', 'ember-data'], function (exports, DS) {
@@ -5839,7 +6093,8 @@ define('fusor-ember-cli/serializers/puppetclass', ['exports', 'ember-data'], fun
             return v;
          });
          return this._super(store, type, wrapped_payload);
-      } });
+      }
+   });
 
 });
 define('fusor-ember-cli/services/validations', ['exports', 'ember'], function (exports, Ember) {
@@ -13812,7 +14067,7 @@ define('fusor-ember-cli/templates/components/tr-engine', ['exports'], function (
             fragment = this.build(dom);
           }
           var morph0 = dom.createMorphAt(fragment,1,1,contextualElement);
-          inline(env, morph0, context, "input", [], {"type": "text", "value": get(env, context, "host.name"), "class": "font-control", "focus-out": "saveHostname", "id": get(env, context, "host.cssHostHostId")});
+          inline(env, morph0, context, "input", [], {"type": "text", "value": get(env, context, "host.name"), "class": "form-control", "focus-out": "saveHostname", "id": get(env, context, "host.cssHostHostId")});
           return fragment;
         }
       };
@@ -13864,6 +14119,7 @@ define('fusor-ember-cli/templates/components/tr-engine', ['exports'], function (
         var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("td");
+        dom.setAttribute(el1,"class","text-center");
         var el2 = dom.createTextNode(" ");
         dom.appendChild(el1, el2);
         var el2 = dom.createComment("");
@@ -13874,6 +14130,7 @@ define('fusor-ember-cli/templates/components/tr-engine', ['exports'], function (
         var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("td");
+        dom.setAttribute(el1,"class","text-center");
         var el2 = dom.createTextNode(" ");
         dom.appendChild(el1, el2);
         var el2 = dom.createComment("");
@@ -13882,6 +14139,7 @@ define('fusor-ember-cli/templates/components/tr-engine', ['exports'], function (
         var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("td");
+        dom.setAttribute(el1,"class","text-center");
         var el2 = dom.createTextNode(" ");
         dom.appendChild(el1, el2);
         var el2 = dom.createComment("");
@@ -13892,6 +14150,7 @@ define('fusor-ember-cli/templates/components/tr-engine', ['exports'], function (
         var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("td");
+        dom.setAttribute(el1,"class","text-center");
         var el2 = dom.createTextNode(" ");
         dom.appendChild(el1, el2);
         var el2 = dom.createComment("");
@@ -13963,6 +14222,92 @@ define('fusor-ember-cli/templates/components/tr-hypervisor', ['exports'], functi
 
   exports['default'] = Ember.HTMLBars.template((function() {
     var child0 = (function() {
+      var child0 = (function() {
+        return {
+          isHTMLBars: true,
+          revision: "Ember@1.11.1",
+          blockParams: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          build: function build(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("      ");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createComment("");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createTextNode("\n");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          render: function render(context, env, contextualElement) {
+            var dom = env.dom;
+            var hooks = env.hooks, get = hooks.get, inline = hooks.inline;
+            dom.detectNamespace(contextualElement);
+            var fragment;
+            if (env.useFragmentCache && dom.canClone) {
+              if (this.cachedFragment === null) {
+                fragment = this.build(dom);
+                if (this.hasRendered) {
+                  this.cachedFragment = fragment;
+                } else {
+                  this.hasRendered = true;
+                }
+              }
+              if (this.cachedFragment) {
+                fragment = dom.cloneNode(this.cachedFragment, true);
+              }
+            } else {
+              fragment = this.build(dom);
+            }
+            var morph0 = dom.createMorphAt(fragment,1,1,contextualElement);
+            inline(env, morph0, context, "input", [], {"type": "text", "value": get(env, context, "host.name"), "class": "form-control", "focus-out": "saveHostname", "id": get(env, context, "host.cssHostHostId")});
+            return fragment;
+          }
+        };
+      }());
+      var child1 = (function() {
+        return {
+          isHTMLBars: true,
+          revision: "Ember@1.11.1",
+          blockParams: 0,
+          cachedFragment: null,
+          hasRendered: false,
+          build: function build(dom) {
+            var el0 = dom.createDocumentFragment();
+            var el1 = dom.createTextNode("      ");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createComment("");
+            dom.appendChild(el0, el1);
+            var el1 = dom.createTextNode("\n");
+            dom.appendChild(el0, el1);
+            return el0;
+          },
+          render: function render(context, env, contextualElement) {
+            var dom = env.dom;
+            var hooks = env.hooks, content = hooks.content;
+            dom.detectNamespace(contextualElement);
+            var fragment;
+            if (env.useFragmentCache && dom.canClone) {
+              if (this.cachedFragment === null) {
+                fragment = this.build(dom);
+                if (this.hasRendered) {
+                  this.cachedFragment = fragment;
+                } else {
+                  this.hasRendered = true;
+                }
+              }
+              if (this.cachedFragment) {
+                fragment = dom.cloneNode(this.cachedFragment, true);
+              }
+            } else {
+              fragment = this.build(dom);
+            }
+            var morph0 = dom.createMorphAt(fragment,1,1,contextualElement);
+            content(env, morph0, context, "host.name");
+            return fragment;
+          }
+        };
+      }());
       return {
         isHTMLBars: true,
         revision: "Ember@1.11.1",
@@ -13971,17 +14316,13 @@ define('fusor-ember-cli/templates/components/tr-hypervisor', ['exports'], functi
         hasRendered: false,
         build: function build(dom) {
           var el0 = dom.createDocumentFragment();
-          var el1 = dom.createTextNode("    ");
-          dom.appendChild(el0, el1);
           var el1 = dom.createComment("");
-          dom.appendChild(el0, el1);
-          var el1 = dom.createTextNode("\n");
           dom.appendChild(el0, el1);
           return el0;
         },
         render: function render(context, env, contextualElement) {
           var dom = env.dom;
-          var hooks = env.hooks, get = hooks.get, inline = hooks.inline;
+          var hooks = env.hooks, get = hooks.get, block = hooks.block;
           dom.detectNamespace(contextualElement);
           var fragment;
           if (env.useFragmentCache && dom.canClone) {
@@ -13999,8 +14340,46 @@ define('fusor-ember-cli/templates/components/tr-hypervisor', ['exports'], functi
           } else {
             fragment = this.build(dom);
           }
-          var morph0 = dom.createMorphAt(fragment,1,1,contextualElement);
-          inline(env, morph0, context, "input", [], {"type": "text", "value": get(env, context, "host.name"), "class": "font-control", "focus-out": "saveHostname", "id": get(env, context, "host.cssHostHostId")});
+          var morph0 = dom.createMorphAt(fragment,0,0,contextualElement);
+          dom.insertBoundary(fragment, null);
+          dom.insertBoundary(fragment, 0);
+          block(env, morph0, context, "if", [get(env, context, "isFreeform")], {}, child0, child1);
+          return fragment;
+        }
+      };
+    }());
+    var child1 = (function() {
+      return {
+        isHTMLBars: true,
+        revision: "Ember@1.11.1",
+        blockParams: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        build: function build(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("    Not Selected\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        render: function render(context, env, contextualElement) {
+          var dom = env.dom;
+          dom.detectNamespace(contextualElement);
+          var fragment;
+          if (env.useFragmentCache && dom.canClone) {
+            if (this.cachedFragment === null) {
+              fragment = this.build(dom);
+              if (this.hasRendered) {
+                this.cachedFragment = fragment;
+              } else {
+                this.hasRendered = true;
+              }
+            }
+            if (this.cachedFragment) {
+              fragment = dom.cloneNode(this.cachedFragment, true);
+            }
+          } else {
+            fragment = this.build(dom);
+          }
           return fragment;
         }
       };
@@ -14021,7 +14400,7 @@ define('fusor-ember-cli/templates/components/tr-hypervisor', ['exports'], functi
         var el2 = dom.createTextNode("\n");
         dom.appendChild(el1, el2);
         dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
+        var el1 = dom.createTextNode("\n\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("td");
         var el2 = dom.createTextNode("\n");
@@ -14052,6 +14431,7 @@ define('fusor-ember-cli/templates/components/tr-hypervisor', ['exports'], functi
         var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("td");
+        dom.setAttribute(el1,"class","text-center");
         var el2 = dom.createTextNode(" ");
         dom.appendChild(el1, el2);
         var el2 = dom.createComment("");
@@ -14062,6 +14442,7 @@ define('fusor-ember-cli/templates/components/tr-hypervisor', ['exports'], functi
         var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("td");
+        dom.setAttribute(el1,"class","text-center");
         var el2 = dom.createTextNode(" ");
         dom.appendChild(el1, el2);
         var el2 = dom.createComment("");
@@ -14070,6 +14451,7 @@ define('fusor-ember-cli/templates/components/tr-hypervisor', ['exports'], functi
         var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("td");
+        dom.setAttribute(el1,"class","text-center");
         var el2 = dom.createTextNode(" ");
         dom.appendChild(el1, el2);
         var el2 = dom.createComment("");
@@ -14080,6 +14462,7 @@ define('fusor-ember-cli/templates/components/tr-hypervisor', ['exports'], functi
         var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("td");
+        dom.setAttribute(el1,"class","text-center");
         var el2 = dom.createTextNode(" ");
         dom.appendChild(el1, el2);
         var el2 = dom.createComment("");
@@ -14103,7 +14486,7 @@ define('fusor-ember-cli/templates/components/tr-hypervisor', ['exports'], functi
       },
       render: function render(context, env, contextualElement) {
         var dom = env.dom;
-        var hooks = env.hooks, get = hooks.get, inline = hooks.inline, block = hooks.block, content = hooks.content;
+        var hooks = env.hooks, get = hooks.get, inline = hooks.inline, element = hooks.element, block = hooks.block, content = hooks.content;
         dom.detectNamespace(contextualElement);
         var fragment;
         if (env.useFragmentCache && dom.canClone) {
@@ -14121,8 +14504,9 @@ define('fusor-ember-cli/templates/components/tr-hypervisor', ['exports'], functi
         } else {
           fragment = this.build(dom);
         }
+        var element0 = dom.childAt(fragment, [2]);
         var morph0 = dom.createMorphAt(dom.childAt(fragment, [0]),1,1);
-        var morph1 = dom.createMorphAt(dom.childAt(fragment, [2]),1,1);
+        var morph1 = dom.createMorphAt(element0,1,1);
         var morph2 = dom.createMorphAt(dom.childAt(fragment, [4]),1,1);
         var morph3 = dom.createMorphAt(dom.childAt(fragment, [6]),1,1);
         var morph4 = dom.createMorphAt(dom.childAt(fragment, [8]),1,1);
@@ -14131,7 +14515,8 @@ define('fusor-ember-cli/templates/components/tr-hypervisor', ['exports'], functi
         var morph7 = dom.createMorphAt(dom.childAt(fragment, [14]),1,1);
         var morph8 = dom.createMorphAt(dom.childAt(fragment, [16]),1,1);
         inline(env, morph0, context, "input", [], {"type": "checkbox", "name": "isSelectedAsHypervisor", "checked": get(env, context, "host.isSelectedAsHypervisor"), "id": get(env, context, "host.cssIdHostId")});
-        block(env, morph1, context, "if", [get(env, context, "host.isSelectedAsHypervisor")], {}, child0, null);
+        element(env, element0, context, "bind-attr", [], {"class": "host.isSelectedAsHypervisor:black-font:not-selected"});
+        block(env, morph1, context, "if", [get(env, context, "host.isSelectedAsHypervisor")], {}, child0, child1);
         content(env, morph2, context, "host.mac");
         content(env, morph3, context, "host.hostType");
         content(env, morph4, context, "host.cpus");
@@ -14179,6 +14564,7 @@ define('fusor-ember-cli/templates/components/tr-management-app', ['exports'], fu
         var el1 = dom.createTextNode("\n");
         dom.appendChild(el0, el1);
         var el1 = dom.createElement("td");
+        dom.setAttribute(el1,"class","text-center");
         var el2 = dom.createTextNode("\n    ");
         dom.appendChild(el1, el2);
         var el2 = dom.createComment("");
@@ -17796,25 +18182,17 @@ define('fusor-ember-cli/templates/engine', ['exports'], function (exports) {
         dom.setAttribute(el2,"class","col-md-12");
         var el3 = dom.createTextNode("\n\n    ");
         dom.appendChild(el2, el3);
-        var el3 = dom.createElement("h4");
-        dom.setAttribute(el3,"style","padding-left:15px;");
-        var el4 = dom.createTextNode("Select a target machine for the ");
+        var el3 = dom.createElement("p");
+        var el4 = dom.createTextNode("\n      Select a target machine for the ");
         dom.appendChild(el3, el4);
         var el4 = dom.createComment("");
         dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode(":");
+        var el4 = dom.createTextNode(":\n    ");
         dom.appendChild(el3, el4);
         dom.appendChild(el2, el3);
         var el3 = dom.createTextNode("\n\n    ");
         dom.appendChild(el2, el3);
-        var el3 = dom.createElement("div");
-        dom.setAttribute(el3,"class","col-md-12");
-        var el4 = dom.createTextNode("\n        ");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createComment("");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n    ");
-        dom.appendChild(el3, el4);
+        var el3 = dom.createComment("");
         dom.appendChild(el2, el3);
         var el3 = dom.createTextNode("\n  ");
         dom.appendChild(el2, el3);
@@ -17848,7 +18226,7 @@ define('fusor-ember-cli/templates/engine', ['exports'], function (exports) {
         }
         var element0 = dom.childAt(fragment, [0, 1]);
         var morph0 = dom.createMorphAt(dom.childAt(element0, [1]),1,1);
-        var morph1 = dom.createMorphAt(dom.childAt(element0, [3]),1,1);
+        var morph1 = dom.createMorphAt(element0,3,3);
         content(env, morph0, context, "engineTabNameLowercase");
         content(env, morph1, context, "outlet");
         return fragment;
@@ -17871,7 +18249,7 @@ define('fusor-ember-cli/templates/engine/discovered-host', ['exports'], function
         hasRendered: false,
         build: function build(dom) {
           var el0 = dom.createDocumentFragment();
-          var el1 = dom.createTextNode("     ");
+          var el1 = dom.createTextNode("         ");
           dom.appendChild(el0, el1);
           var el1 = dom.createComment("");
           dom.appendChild(el0, el1);
@@ -17913,86 +18291,179 @@ define('fusor-ember-cli/templates/engine/discovered-host', ['exports'], function
       hasRendered: false,
       build: function build(dom) {
         var el0 = dom.createDocumentFragment();
-        var el1 = dom.createElement("br");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createElement("table");
-        dom.setAttribute(el1,"class","table table-bordered table-striped small");
-        var el2 = dom.createTextNode("\n");
+        var el1 = dom.createElement("div");
+        dom.setAttribute(el1,"class","row");
+        var el2 = dom.createTextNode("\n  ");
         dom.appendChild(el1, el2);
-        var el2 = dom.createElement("thead");
-        var el3 = dom.createTextNode("\n    ");
+        var el2 = dom.createElement("div");
+        dom.setAttribute(el2,"class","col-md-11");
+        var el3 = dom.createTextNode("\n\n    ");
         dom.appendChild(el2, el3);
-        var el3 = dom.createElement("tr");
+        var el3 = dom.createElement("div");
+        dom.setAttribute(el3,"class","rhev-searchbar clearfix");
         var el4 = dom.createTextNode("\n      ");
         dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" ");
+        var el4 = dom.createElement("form");
+        dom.setAttribute(el4,"class","form-inline");
+        var el5 = dom.createTextNode("\n        ");
         dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n      ");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" Host Name ");
+        var el5 = dom.createElement("div");
+        dom.setAttribute(el5,"class","col-md-9");
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("div");
+        dom.setAttribute(el6,"class","form-group");
+        var el7 = dom.createTextNode("\n            ");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createElement("div");
+        dom.setAttribute(el7,"class","rhev-search-box");
+        var el8 = dom.createTextNode("\n                ");
+        dom.appendChild(el7, el8);
+        var el8 = dom.createComment("");
+        dom.appendChild(el7, el8);
+        var el8 = dom.createTextNode("\n                ");
+        dom.appendChild(el7, el8);
+        var el8 = dom.createElement("button");
+        dom.setAttribute(el8,"class","rhev-search-button");
+        var el9 = dom.createTextNode("\n                  ");
+        dom.appendChild(el8, el9);
+        var el9 = dom.createElement("i");
+        dom.setAttribute(el9,"class","fa fa-search");
+        dom.appendChild(el8, el9);
+        var el9 = dom.createTextNode("\n                ");
+        dom.appendChild(el8, el9);
+        dom.appendChild(el7, el8);
+        var el8 = dom.createTextNode("\n            ");
+        dom.appendChild(el7, el8);
+        dom.appendChild(el6, el7);
+        var el7 = dom.createTextNode("\n          ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n        ");
+        dom.appendChild(el5, el6);
         dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n      ");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" MAC Address ");
+        var el5 = dom.createTextNode("\n\n        ");
         dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n      ");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" Host Type ");
+        var el5 = dom.createElement("div");
+        dom.setAttribute(el5,"class","col-md-3 text-right");
+        var el6 = dom.createTextNode("\n\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createComment("");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode(" selected\n\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("span");
+        dom.setAttribute(el6,"class","rhev-select-all");
+        var el7 = dom.createTextNode("\n          ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("button");
+        dom.setAttribute(el6,"class","btn btn-default btn-sm");
+        var el7 = dom.createTextNode("Refresh Data");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n        ");
+        dom.appendChild(el5, el6);
         dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n      ");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" CPU ");
-        dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n      ");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" Memory ");
-        dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n      ");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" # Disks ");
-        dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n      ");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" Disk Space ");
-        dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n      ");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" Network ");
+        var el5 = dom.createTextNode("\n\n      ");
         dom.appendChild(el4, el5);
         dom.appendChild(el3, el4);
         var el4 = dom.createTextNode("\n    ");
         dom.appendChild(el3, el4);
         dom.appendChild(el2, el3);
-        var el3 = dom.createTextNode("\n  ");
+        var el3 = dom.createTextNode("\n\n    ");
         dom.appendChild(el2, el3);
-        dom.appendChild(el1, el2);
-        var el2 = dom.createTextNode("\n\n  ");
-        dom.appendChild(el1, el2);
-        var el2 = dom.createElement("tbody");
-        var el3 = dom.createTextNode("\n");
+        var el3 = dom.createElement("table");
+        dom.setAttribute(el3,"class","table table-bordered small fusor-table");
+        var el4 = dom.createTextNode("\n      ");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createElement("thead");
+        var el5 = dom.createTextNode("\n        ");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createElement("tr");
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        dom.setAttribute(el6,"class","rhev-checkbox");
+        var el7 = dom.createTextNode(" ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        dom.setAttribute(el6,"class","rhev-hostname");
+        var el7 = dom.createTextNode(" Host Name ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        var el7 = dom.createTextNode(" MAC Address ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        var el7 = dom.createTextNode(" Host Type ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        dom.setAttribute(el6,"class","rhev-cpu text-center");
+        var el7 = dom.createTextNode(" CPU ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        dom.setAttribute(el6,"class","rhev-memory text-center");
+        var el7 = dom.createTextNode(" Memory ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        dom.setAttribute(el6,"class","rhev-disks text-center");
+        var el7 = dom.createTextNode(" # Disks ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        dom.setAttribute(el6,"class","rhev-diskspace text-center");
+        var el7 = dom.createTextNode(" Disk Space ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        dom.setAttribute(el6,"class","rhev-network");
+        var el7 = dom.createTextNode(" Network ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n        ");
+        dom.appendChild(el5, el6);
+        dom.appendChild(el4, el5);
+        var el5 = dom.createTextNode("\n      ");
+        dom.appendChild(el4, el5);
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("\n\n      ");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createElement("tbody");
+        var el5 = dom.createTextNode("\n");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createComment("");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createTextNode("      ");
+        dom.appendChild(el4, el5);
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("\n    ");
+        dom.appendChild(el3, el4);
         dom.appendChild(el2, el3);
-        var el3 = dom.createComment("");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createTextNode("  ");
+        var el3 = dom.createTextNode("\n\n  ");
         dom.appendChild(el2, el3);
         dom.appendChild(el1, el2);
         var el2 = dom.createTextNode("\n");
@@ -18008,7 +18479,7 @@ define('fusor-ember-cli/templates/engine/discovered-host', ['exports'], function
       },
       render: function render(context, env, contextualElement) {
         var dom = env.dom;
-        var hooks = env.hooks, get = hooks.get, block = hooks.block, inline = hooks.inline;
+        var hooks = env.hooks, get = hooks.get, inline = hooks.inline, content = hooks.content, element = hooks.element, block = hooks.block;
         dom.detectNamespace(contextualElement);
         var fragment;
         if (env.useFragmentCache && dom.canClone) {
@@ -18026,10 +18497,19 @@ define('fusor-ember-cli/templates/engine/discovered-host', ['exports'], function
         } else {
           fragment = this.build(dom);
         }
-        var morph0 = dom.createMorphAt(dom.childAt(fragment, [2, 3]),1,1);
-        var morph1 = dom.createMorphAt(fragment,4,4,contextualElement);
-        block(env, morph0, context, "each", [get(env, context, "availableHosts")], {"itemController": "discovered-host", "keyword": "host"}, child0, null);
-        inline(env, morph1, context, "cancel-back-next", [], {"backRouteName": "rhev-setup", "disableBack": false, "nextRouteName": get(env, context, "engineNextRouteName"), "disableNext": false});
+        var element0 = dom.childAt(fragment, [0, 1]);
+        var element1 = dom.childAt(element0, [1, 1]);
+        var element2 = dom.childAt(element1, [3]);
+        var element3 = dom.childAt(element2, [5]);
+        var morph0 = dom.createMorphAt(dom.childAt(element1, [1, 1, 1]),1,1);
+        var morph1 = dom.createMorphAt(element2,1,1);
+        var morph2 = dom.createMorphAt(dom.childAt(element0, [3, 3]),1,1);
+        var morph3 = dom.createMorphAt(fragment,2,2,contextualElement);
+        inline(env, morph0, context, "input", [], {"type": "text", "class": "form-control rhev-hostnam22e", "placeholder": " Search ...", "value": get(env, context, "searchString")});
+        content(env, morph1, context, "numSelected");
+        element(env, element3, context, "action", ["refreshModel"], {});
+        block(env, morph2, context, "each", [get(env, context, "filteredHosts")], {"itemController": "discovered-host", "keyword": "host"}, child0, null);
+        inline(env, morph3, context, "cancel-back-next", [], {"backRouteName": "rhev-setup", "disableBack": false, "nextRouteName": get(env, context, "engineNextRouteName"), "disableNext": false});
         return fragment;
       }
     };
@@ -18527,6 +19007,56 @@ define('fusor-ember-cli/templates/hypervisor', ['exports'], function (exports) {
   'use strict';
 
   exports['default'] = Ember.HTMLBars.template((function() {
+    var child0 = (function() {
+      return {
+        isHTMLBars: true,
+        revision: "Ember@1.11.1",
+        blockParams: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        build: function build(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("          ");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("span");
+          dom.setAttribute(el1,"class","prepend-host-names");
+          var el2 = dom.createTextNode("\n            Prepend host names with ");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode("\n          ");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        render: function render(context, env, contextualElement) {
+          var dom = env.dom;
+          var hooks = env.hooks, get = hooks.get, inline = hooks.inline;
+          dom.detectNamespace(contextualElement);
+          var fragment;
+          if (env.useFragmentCache && dom.canClone) {
+            if (this.cachedFragment === null) {
+              fragment = this.build(dom);
+              if (this.hasRendered) {
+                this.cachedFragment = fragment;
+              } else {
+                this.hasRendered = true;
+              }
+            }
+            if (this.cachedFragment) {
+              fragment = dom.cloneNode(this.cachedFragment, true);
+            }
+          } else {
+            fragment = this.build(dom);
+          }
+          var morph0 = dom.createMorphAt(dom.childAt(fragment, [1]),1,1);
+          inline(env, morph0, context, "input", [], {"type": "text", "value": get(env, context, "custom_preprend_name")});
+          return fragment;
+        }
+      };
+    }());
     return {
       isHTMLBars: true,
       revision: "Ember@1.11.1",
@@ -18543,21 +19073,39 @@ define('fusor-ember-cli/templates/hypervisor', ['exports'], function (exports) {
         dom.setAttribute(el2,"class","col-md-12");
         var el3 = dom.createTextNode("\n\n    ");
         dom.appendChild(el2, el3);
-        var el3 = dom.createElement("h4");
-        dom.setAttribute(el3,"style","padding-left:15px;");
-        var el4 = dom.createTextNode("Select one or more target machines to be hypervisors.");
+        var el3 = dom.createElement("p");
+        var el4 = dom.createTextNode("\n      Select one or more target machines to be hypervisors.\n    ");
         dom.appendChild(el3, el4);
         dom.appendChild(el2, el3);
         var el3 = dom.createTextNode("\n\n    ");
         dom.appendChild(el2, el3);
-        var el3 = dom.createElement("div");
-        dom.setAttribute(el3,"class","col-md-12");
-        var el4 = dom.createTextNode("\n        ");
+        var el3 = dom.createElement("form");
+        dom.setAttribute(el3,"class","form-inline");
+        var el4 = dom.createTextNode("\n      ");
         dom.appendChild(el3, el4);
-        var el4 = dom.createComment("");
+        var el4 = dom.createElement("div");
+        dom.setAttribute(el4,"class","form-group");
+        var el5 = dom.createTextNode("\n        Host naming scheme   ");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createComment("");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createTextNode("\n\n");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createComment("");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createTextNode("      ");
+        dom.appendChild(el4, el5);
         dom.appendChild(el3, el4);
         var el4 = dom.createTextNode("\n    ");
         dom.appendChild(el3, el4);
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n\n    ");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createElement("br");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createTextNode("\n\n    ");
+        dom.appendChild(el2, el3);
+        var el3 = dom.createComment("");
         dom.appendChild(el2, el3);
         var el3 = dom.createTextNode("\n  ");
         dom.appendChild(el2, el3);
@@ -18571,7 +19119,7 @@ define('fusor-ember-cli/templates/hypervisor', ['exports'], function (exports) {
       },
       render: function render(context, env, contextualElement) {
         var dom = env.dom;
-        var hooks = env.hooks, content = hooks.content;
+        var hooks = env.hooks, get = hooks.get, inline = hooks.inline, block = hooks.block, content = hooks.content;
         dom.detectNamespace(contextualElement);
         var fragment;
         if (env.useFragmentCache && dom.canClone) {
@@ -18589,8 +19137,14 @@ define('fusor-ember-cli/templates/hypervisor', ['exports'], function (exports) {
         } else {
           fragment = this.build(dom);
         }
-        var morph0 = dom.createMorphAt(dom.childAt(fragment, [0, 1, 3]),1,1);
-        content(env, morph0, context, "outlet");
+        var element0 = dom.childAt(fragment, [0, 1]);
+        var element1 = dom.childAt(element0, [3, 1]);
+        var morph0 = dom.createMorphAt(element1,1,1);
+        var morph1 = dom.createMorphAt(element1,3,3);
+        var morph2 = dom.createMorphAt(element0,7,7);
+        inline(env, morph0, context, "view", ["select"], {"content": get(env, context, "namingOptions"), "value": get(env, context, "host_naming_scheme"), "class": "form-control"});
+        block(env, morph1, context, "if", [get(env, context, "isCustomScheme")], {}, child0, null);
+        content(env, morph2, context, "outlet");
         return fragment;
       }
     };
@@ -18611,7 +19165,109 @@ define('fusor-ember-cli/templates/hypervisor/discovered-host', ['exports'], func
         hasRendered: false,
         build: function build(dom) {
           var el0 = dom.createDocumentFragment();
-          var el1 = dom.createTextNode("     ");
+          var el1 = dom.createTextNode("              ");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("a");
+          var el2 = dom.createTextNode("Deselect all (");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode(")");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        render: function render(context, env, contextualElement) {
+          var dom = env.dom;
+          var hooks = env.hooks, element = hooks.element, content = hooks.content;
+          dom.detectNamespace(contextualElement);
+          var fragment;
+          if (env.useFragmentCache && dom.canClone) {
+            if (this.cachedFragment === null) {
+              fragment = this.build(dom);
+              if (this.hasRendered) {
+                this.cachedFragment = fragment;
+              } else {
+                this.hasRendered = true;
+              }
+            }
+            if (this.cachedFragment) {
+              fragment = dom.cloneNode(this.cachedFragment, true);
+            }
+          } else {
+            fragment = this.build(dom);
+          }
+          var element2 = dom.childAt(fragment, [1]);
+          var morph0 = dom.createMorphAt(element2,1,1);
+          element(env, element2, context, "action", ["setUncheckAll"], {});
+          content(env, morph0, context, "availableHosts.length");
+          return fragment;
+        }
+      };
+    }());
+    var child1 = (function() {
+      return {
+        isHTMLBars: true,
+        revision: "Ember@1.11.1",
+        blockParams: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        build: function build(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("              ");
+          dom.appendChild(el0, el1);
+          var el1 = dom.createElement("a");
+          var el2 = dom.createTextNode("Select all (");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createComment("");
+          dom.appendChild(el1, el2);
+          var el2 = dom.createTextNode(")");
+          dom.appendChild(el1, el2);
+          dom.appendChild(el0, el1);
+          var el1 = dom.createTextNode("\n");
+          dom.appendChild(el0, el1);
+          return el0;
+        },
+        render: function render(context, env, contextualElement) {
+          var dom = env.dom;
+          var hooks = env.hooks, element = hooks.element, content = hooks.content;
+          dom.detectNamespace(contextualElement);
+          var fragment;
+          if (env.useFragmentCache && dom.canClone) {
+            if (this.cachedFragment === null) {
+              fragment = this.build(dom);
+              if (this.hasRendered) {
+                this.cachedFragment = fragment;
+              } else {
+                this.hasRendered = true;
+              }
+            }
+            if (this.cachedFragment) {
+              fragment = dom.cloneNode(this.cachedFragment, true);
+            }
+          } else {
+            fragment = this.build(dom);
+          }
+          var element1 = dom.childAt(fragment, [1]);
+          var morph0 = dom.createMorphAt(element1,1,1);
+          element(env, element1, context, "action", ["setCheckAll"], {});
+          content(env, morph0, context, "availableHosts.length");
+          return fragment;
+        }
+      };
+    }());
+    var child2 = (function() {
+      return {
+        isHTMLBars: true,
+        revision: "Ember@1.11.1",
+        blockParams: 0,
+        cachedFragment: null,
+        hasRendered: false,
+        build: function build(dom) {
+          var el0 = dom.createDocumentFragment();
+          var el1 = dom.createTextNode("         ");
           dom.appendChild(el0, el1);
           var el1 = dom.createComment("");
           dom.appendChild(el0, el1);
@@ -18640,12 +19296,12 @@ define('fusor-ember-cli/templates/hypervisor/discovered-host', ['exports'], func
             fragment = this.build(dom);
           }
           var morph0 = dom.createMorphAt(fragment,1,1,contextualElement);
-          inline(env, morph0, context, "tr-hypervisor", [], {"host": get(env, context, "host")});
+          inline(env, morph0, context, "tr-hypervisor", [], {"host": get(env, context, "host"), "isCustomScheme": get(env, context, "isCustomScheme"), "isMac": get(env, context, "isMac"), "isHypervisorN": get(env, context, "isHypervisorN"), "custom_preprend_name": get(env, context, "custom_preprend_name"), "isFreeform": get(env, context, "isFreeform"), "num": get(env, context, "host.id")});
           return fragment;
         }
       };
     }());
-    var child1 = (function() {
+    var child3 = (function() {
       return {
         isHTMLBars: true,
         revision: "Ember@1.11.1",
@@ -18699,106 +19355,183 @@ define('fusor-ember-cli/templates/hypervisor/discovered-host', ['exports'], func
       hasRendered: false,
       build: function build(dom) {
         var el0 = dom.createDocumentFragment();
-        var el1 = dom.createElement("strong");
-        var el2 = dom.createComment("");
-        dom.appendChild(el1, el2);
-        dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode(" of ");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createElement("strong");
-        var el2 = dom.createComment("");
-        dom.appendChild(el1, el2);
-        dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\navailable hosts selected ");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createComment("");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createElement("br");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createElement("br");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createTextNode("\n");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createElement("table");
-        dom.setAttribute(el1,"class","table table-bordered table-striped small");
+        var el1 = dom.createElement("div");
+        dom.setAttribute(el1,"class","row");
         var el2 = dom.createTextNode("\n  ");
         dom.appendChild(el1, el2);
-        var el2 = dom.createElement("thead");
-        var el3 = dom.createTextNode("\n    ");
+        var el2 = dom.createElement("div");
+        dom.setAttribute(el2,"class","col-md-11");
+        var el3 = dom.createTextNode("\n\n    ");
         dom.appendChild(el2, el3);
-        var el3 = dom.createElement("tr");
+        var el3 = dom.createElement("div");
+        dom.setAttribute(el3,"class","rhev-searchbar clearfix");
         var el4 = dom.createTextNode("\n      ");
         dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" ");
+        var el4 = dom.createElement("form");
+        dom.setAttribute(el4,"class","form-inline");
+        var el5 = dom.createTextNode("\n        ");
         dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n      ");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" Host Name ");
+        var el5 = dom.createElement("div");
+        dom.setAttribute(el5,"class","col-md-7");
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("div");
+        dom.setAttribute(el6,"class","form-group");
+        var el7 = dom.createTextNode("\n            ");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createElement("div");
+        dom.setAttribute(el7,"class","rhev-search-box");
+        var el8 = dom.createTextNode("\n                ");
+        dom.appendChild(el7, el8);
+        var el8 = dom.createComment("");
+        dom.appendChild(el7, el8);
+        var el8 = dom.createTextNode("\n                ");
+        dom.appendChild(el7, el8);
+        var el8 = dom.createElement("button");
+        dom.setAttribute(el8,"class","rhev-search-button");
+        var el9 = dom.createTextNode("\n                  ");
+        dom.appendChild(el8, el9);
+        var el9 = dom.createElement("i");
+        dom.setAttribute(el9,"class","fa fa-search");
+        dom.appendChild(el8, el9);
+        var el9 = dom.createTextNode("\n                ");
+        dom.appendChild(el8, el9);
+        dom.appendChild(el7, el8);
+        var el8 = dom.createTextNode("\n            ");
+        dom.appendChild(el7, el8);
+        dom.appendChild(el6, el7);
+        var el7 = dom.createTextNode("\n          ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n        ");
+        dom.appendChild(el5, el6);
         dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n      ");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" MAC Address ");
+        var el5 = dom.createTextNode("\n\n        ");
         dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n      ");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" Host Type ");
+        var el5 = dom.createElement("div");
+        dom.setAttribute(el5,"class","col-md-5 text-right");
+        var el6 = dom.createTextNode("\n\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createComment("");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode(" selected\n\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("span");
+        dom.setAttribute(el6,"class","rhev-select-all");
+        var el7 = dom.createTextNode("\n");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createComment("");
+        dom.appendChild(el6, el7);
+        var el7 = dom.createTextNode("          ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("button");
+        dom.setAttribute(el6,"class","btn btn-default btn-sm");
+        var el7 = dom.createTextNode("Refresh Data");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n        ");
+        dom.appendChild(el5, el6);
         dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n      ");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" CPU ");
-        dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n      ");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" Memory ");
-        dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n      ");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" # Disks ");
-        dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n      ");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" Disk Space ");
-        dom.appendChild(el4, el5);
-        dom.appendChild(el3, el4);
-        var el4 = dom.createTextNode("\n      ");
-        dom.appendChild(el3, el4);
-        var el4 = dom.createElement("th");
-        var el5 = dom.createTextNode(" Network ");
+        var el5 = dom.createTextNode("\n\n      ");
         dom.appendChild(el4, el5);
         dom.appendChild(el3, el4);
         var el4 = dom.createTextNode("\n    ");
         dom.appendChild(el3, el4);
         dom.appendChild(el2, el3);
-        var el3 = dom.createTextNode("\n  ");
+        var el3 = dom.createTextNode("\n\n    ");
         dom.appendChild(el2, el3);
-        dom.appendChild(el1, el2);
-        var el2 = dom.createTextNode("\n\n  ");
-        dom.appendChild(el1, el2);
-        var el2 = dom.createElement("tbody");
-        var el3 = dom.createTextNode("\n");
+        var el3 = dom.createElement("table");
+        dom.setAttribute(el3,"class","table table-bordered small fusor-table");
+        var el4 = dom.createTextNode("\n      ");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createElement("thead");
+        var el5 = dom.createTextNode("\n        ");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createElement("tr");
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        dom.setAttribute(el6,"class","rhev-checkbox");
+        var el7 = dom.createTextNode(" ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        dom.setAttribute(el6,"class","rhev-hostname");
+        var el7 = dom.createTextNode(" Host Name ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        var el7 = dom.createTextNode(" MAC Address ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        var el7 = dom.createTextNode(" Host Type ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        dom.setAttribute(el6,"class","rhev-cpu text-center");
+        var el7 = dom.createTextNode(" CPU ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        dom.setAttribute(el6,"class","rhev-memory text-center");
+        var el7 = dom.createTextNode(" Memory ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        dom.setAttribute(el6,"class","rhev-disks text-center");
+        var el7 = dom.createTextNode(" # Disks ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        dom.setAttribute(el6,"class","rhev-diskspace text-center");
+        var el7 = dom.createTextNode(" Disk Space ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n          ");
+        dom.appendChild(el5, el6);
+        var el6 = dom.createElement("th");
+        dom.setAttribute(el6,"class","rhev-network");
+        var el7 = dom.createTextNode(" Network ");
+        dom.appendChild(el6, el7);
+        dom.appendChild(el5, el6);
+        var el6 = dom.createTextNode("\n        ");
+        dom.appendChild(el5, el6);
+        dom.appendChild(el4, el5);
+        var el5 = dom.createTextNode("\n      ");
+        dom.appendChild(el4, el5);
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("\n\n      ");
+        dom.appendChild(el3, el4);
+        var el4 = dom.createElement("tbody");
+        var el5 = dom.createTextNode("\n");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createComment("");
+        dom.appendChild(el4, el5);
+        var el5 = dom.createTextNode("      ");
+        dom.appendChild(el4, el5);
+        dom.appendChild(el3, el4);
+        var el4 = dom.createTextNode("\n    ");
+        dom.appendChild(el3, el4);
         dom.appendChild(el2, el3);
-        var el3 = dom.createComment("");
-        dom.appendChild(el2, el3);
-        var el3 = dom.createTextNode("  ");
+        var el3 = dom.createTextNode("\n\n  ");
         dom.appendChild(el2, el3);
         dom.appendChild(el1, el2);
         var el2 = dom.createTextNode("\n");
@@ -18812,7 +19545,7 @@ define('fusor-ember-cli/templates/hypervisor/discovered-host', ['exports'], func
       },
       render: function render(context, env, contextualElement) {
         var dom = env.dom;
-        var hooks = env.hooks, content = hooks.content, get = hooks.get, block = hooks.block;
+        var hooks = env.hooks, get = hooks.get, inline = hooks.inline, content = hooks.content, block = hooks.block, element = hooks.element;
         dom.detectNamespace(contextualElement);
         var fragment;
         if (env.useFragmentCache && dom.canClone) {
@@ -18830,17 +19563,22 @@ define('fusor-ember-cli/templates/hypervisor/discovered-host', ['exports'], func
         } else {
           fragment = this.build(dom);
         }
-        var morph0 = dom.createMorphAt(dom.childAt(fragment, [0]),0,0);
-        var morph1 = dom.createMorphAt(dom.childAt(fragment, [2]),0,0);
-        var morph2 = dom.createMorphAt(fragment,4,4,contextualElement);
-        var morph3 = dom.createMorphAt(dom.childAt(fragment, [10, 3]),1,1);
-        var morph4 = dom.createMorphAt(fragment,12,12,contextualElement);
+        var element3 = dom.childAt(fragment, [0, 1]);
+        var element4 = dom.childAt(element3, [1, 1]);
+        var element5 = dom.childAt(element4, [3]);
+        var element6 = dom.childAt(element5, [5]);
+        var morph0 = dom.createMorphAt(dom.childAt(element4, [1, 1, 1]),1,1);
+        var morph1 = dom.createMorphAt(element5,1,1);
+        var morph2 = dom.createMorphAt(dom.childAt(element5, [3]),1,1);
+        var morph3 = dom.createMorphAt(dom.childAt(element3, [3, 3]),1,1);
+        var morph4 = dom.createMorphAt(fragment,2,2,contextualElement);
         dom.insertBoundary(fragment, null);
-        content(env, morph0, context, "model.length");
-        content(env, morph1, context, "availableHosts.length");
-        content(env, morph2, context, "idsChecked");
-        block(env, morph3, context, "each", [get(env, context, "availableHosts")], {"itemController": "discovered-host", "keyword": "host"}, child0, null);
-        block(env, morph4, context, "cancel-back-next", [], {"backRouteName": get(env, context, "hypervisorBackRouteName"), "disableBack": false, "parentController": get(env, context, "controller")}, child1, null);
+        inline(env, morph0, context, "input", [], {"type": "text", "class": "form-control rhev-hostnam22e", "placeholder": " Search ...", "value": get(env, context, "searchString")});
+        content(env, morph1, context, "model.length");
+        block(env, morph2, context, "if", [get(env, context, "isAllChecked")], {}, child0, child1);
+        element(env, element6, context, "action", ["refreshModel"], {});
+        block(env, morph3, context, "each", [get(env, context, "filteredHosts")], {"itemController": "discovered-host", "keyword": "host"}, child2, null);
+        block(env, morph4, context, "cancel-back-next", [], {"backRouteName": get(env, context, "hypervisorBackRouteName"), "disableBack": false, "parentController": get(env, context, "controller")}, child3, null);
         return fragment;
       }
     };
@@ -30077,7 +30815,7 @@ define('fusor-ember-cli/templates/subscriptions/management-application', ['expor
         var el3 = dom.createTextNode("\n    ");
         dom.appendChild(el2, el3);
         var el3 = dom.createElement("table");
-        dom.setAttribute(el3,"class","table table-striped");
+        dom.setAttribute(el3,"class","table table-bordered");
         var el4 = dom.createTextNode("\n      ");
         dom.appendChild(el3, el4);
         var el4 = dom.createElement("thead");
@@ -30523,7 +31261,7 @@ define('fusor-ember-cli/templates/subscriptions/select-subscriptions', ['exports
         var morph3 = dom.createMorphAt(fragment,14,14,contextualElement);
         dom.insertBoundary(fragment, 0);
         block(env, morph0, context, "if", [get(env, context, "showAttachedSuccessMessage")], {}, child0, null);
-        inline(env, morph1, context, "input", [], {"type": "checkbox", "name": "enableAnalytics", "disabled": true, "checked": get(env, context, "enableAnalytics")});
+        inline(env, morph1, context, "input", [], {"type": "checkbox", "name": "enableAnalytics", "disabled": false, "checked": get(env, context, "enableAnalytics")});
         attribute(env, attrMorph0, element0, "class", get(env, context, "analyticsColor"));
         block(env, morph2, context, "each", [get(env, context, "model")], {"itemController": "subscription", "keyword": "subscription"}, child1, child2);
         inline(env, morph3, context, "cancel-back-next", [], {"backRouteName": "subscriptions.management-application", "disableBack": false, "nextRouteName": "review", "disableNext": false, "parentController": get(env, context, "controller")});
@@ -31297,7 +32035,7 @@ define('fusor-ember-cli/tests/components/tr-management-app.jshint', function () 
 
   module('JSHint - components');
   test('components/tr-management-app.js should pass jshint', function() { 
-    ok(false, 'components/tr-management-app.js should pass jshint.\ncomponents/tr-management-app.js: line 12, col 35, \'event\' is defined but never used.\n\n1 error'); 
+    ok(false, 'components/tr-management-app.js should pass jshint.\ncomponents/tr-management-app.js: line 20, col 35, \'event\' is defined but never used.\n\n1 error'); 
   });
 
 });
@@ -31607,7 +32345,7 @@ define('fusor-ember-cli/tests/controllers/hypervisor/discovered-host.jshint', fu
 
   module('JSHint - controllers/hypervisor');
   test('controllers/hypervisor/discovered-host.js should pass jshint', function() { 
-    ok(false, 'controllers/hypervisor/discovered-host.js should pass jshint.\ncontrollers/hypervisor/discovered-host.js: line 13, col 30, Expected \'!==\' and instead saw \'!=\'.\ncontrollers/hypervisor/discovered-host.js: line 12, col 85, \'array\' is defined but never used.\ncontrollers/hypervisor/discovered-host.js: line 12, col 78, \'index\' is defined but never used.\ncontrollers/hypervisor/discovered-host.js: line 31, col 31, \'value\' is defined but never used.\ncontrollers/hypervisor/discovered-host.js: line 31, col 26, \'key\' is defined but never used.\ncontrollers/hypervisor/discovered-host.js: line 39, col 29, \'value\' is defined but never used.\ncontrollers/hypervisor/discovered-host.js: line 39, col 24, \'key\' is defined but never used.\ncontrollers/hypervisor/discovered-host.js: line 53, col 22, \'row\' is defined but never used.\ncontrollers/hypervisor/discovered-host.js: line 69, col 24, \'key\' is defined but never used.\n\n9 errors'); 
+    ok(false, 'controllers/hypervisor/discovered-host.js should pass jshint.\ncontrollers/hypervisor/discovered-host.js: line 19, col 30, Expected \'!==\' and instead saw \'!=\'.\ncontrollers/hypervisor/discovered-host.js: line 18, col 85, \'array\' is defined but never used.\ncontrollers/hypervisor/discovered-host.js: line 18, col 78, \'index\' is defined but never used.\ncontrollers/hypervisor/discovered-host.js: line 58, col 31, \'row\' is defined but never used.\ncontrollers/hypervisor/discovered-host.js: line 67, col 24, \'key\' is defined but never used.\n\n5 errors'); 
   });
 
 });
@@ -38806,7 +39544,8 @@ define('fusor-ember-cli/views/organization', ['exports', 'ember'], function (exp
     doubleClick: function doubleClick(event) {
       this.set('color', 'red');
       //alert("ClickableView was clicked!");
-    } });
+    }
+  });
 
 });
 define('fusor-ember-cli/views/rhci', ['exports', 'ember'], function (exports, Ember) {
@@ -38859,13 +39598,13 @@ define('fusor-ember-cli/views/rhci', ['exports', 'ember'], function (exports, Em
 /* jshint ignore:start */
 
 define('fusor-ember-cli/config/environment', ['ember'], function(Ember) {
-  return { 'default': {"modulePrefix":"fusor-ember-cli","environment":"development","baseURL":"/","locationType":"hash","EmberENV":{"FEATURES":{}},"contentSecurityPolicyHeader":"Disabled-Content-Security-Policy","APP":{"LOG_ACTIVE_GENERATION":true,"LOG_TRANSITIONS":true,"LOG_VIEW_LOOKUPS":true,"rootElement":"#ember-app","name":"fusor-ember-cli","version":"0.0.0.51d74037"},"contentSecurityPolicy":{"default-src":"'none'","script-src":"'self' 'unsafe-eval'","font-src":"'self'","connect-src":"'self'","img-src":"'self'","style-src":"'self'","media-src":"'self'"},"exportApplicationGlobal":true}};
+  return { 'default': {"modulePrefix":"fusor-ember-cli","environment":"development","baseURL":"/","locationType":"hash","EmberENV":{"FEATURES":{}},"contentSecurityPolicyHeader":"Disabled-Content-Security-Policy","APP":{"LOG_ACTIVE_GENERATION":true,"LOG_TRANSITIONS":true,"LOG_VIEW_LOOKUPS":true,"rootElement":"#ember-app","name":"fusor-ember-cli","version":"0.0.0.2ee7f26a"},"contentSecurityPolicy":{"default-src":"'none'","script-src":"'self' 'unsafe-eval'","font-src":"'self'","connect-src":"'self'","img-src":"'self'","style-src":"'self'","media-src":"'self'"},"exportApplicationGlobal":true}};
 });
 
 if (runningTests) {
   require("fusor-ember-cli/tests/test-helper");
 } else {
-  require("fusor-ember-cli/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_TRANSITIONS":true,"LOG_VIEW_LOOKUPS":true,"rootElement":"#ember-app","name":"fusor-ember-cli","version":"0.0.0.51d74037"});
+  require("fusor-ember-cli/app")["default"].create({"LOG_ACTIVE_GENERATION":true,"LOG_TRANSITIONS":true,"LOG_VIEW_LOOKUPS":true,"rootElement":"#ember-app","name":"fusor-ember-cli","version":"0.0.0.2ee7f26a"});
 }
 
 /* jshint ignore:end */
