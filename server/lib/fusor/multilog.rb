@@ -11,7 +11,9 @@ class MultiLogger
   def attach(name)
     @logdev ||= {}
     if !name.nil? and !@logdev.key? name
-      @logdev[name] = Logger.new(name)
+      logger = Logger.new(name)
+      logger.level = log_level
+      @logdev[name] = logger
     end
   end
 
@@ -40,5 +42,14 @@ class MultiLogger
       dev.send(method, *args)
     end
   end
+
+  def log_level
+    levels = { ":debug" => Logger::DEBUG, 
+               ":info" => Logger::INFO, 
+               ":warn" => Logger::WARN, 
+               ":error" => Logger::ERROR, 
+               ":fatal" => Logger::FATAL, 
+               ":unknown" => Logger::UNKNOWN }
+    levels[SETTINGS[:fusor][:system][:logging][:level]]
+  end
 end
-#end
