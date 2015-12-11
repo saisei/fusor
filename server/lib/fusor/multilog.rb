@@ -44,11 +44,11 @@ class MultiLogger
   end
 
   def log_level
-    levels = { ":debug" => Logger::DEBUG, 
-               ":info" => Logger::INFO, 
-               ":warn" => Logger::WARN, 
-               ":error" => Logger::ERROR, 
-               ":fatal" => Logger::FATAL, 
+    levels = { ":debug" => Logger::DEBUG,
+               ":info" => Logger::INFO,
+               ":warn" => Logger::WARN,
+               ":error" => Logger::ERROR,
+               ":fatal" => Logger::FATAL,
                ":unknown" => Logger::UNKNOWN }
     levels[SETTINGS[:fusor][:system][:logging][:level]]
   end
