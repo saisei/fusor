@@ -2,9 +2,9 @@ require 'logger'
 
 class MultiLogger
   attr_reader :logdev
-
   def initialize(logger)
     @original = logger
+    @default_log_level ||= Logger::DEBUG
   end
 
   # Creates and write to additional log file(s).
@@ -50,6 +50,19 @@ class MultiLogger
                ":error" => Logger::ERROR,
                ":fatal" => Logger::FATAL,
                ":unknown" => Logger::UNKNOWN }
-    levels[SETTINGS[:fusor][:system][:logging][:level]]
+    if !check_nested_key(SETTINGS, [:fusor, :system, :logging, :level])
+      @default_log_level
+    else
+      levels[SETTINGS[:fusor][:system][:logging][:level]]
+    end
+  end
+
+  def check_nested_key(hash, keys)
+    k = keys.shift
+    if keys.length == 0
+      hash.key? k
+    else
+      (hash.key? k) && check_nested_key(hash[k], keys)
+    end
   end
 end
